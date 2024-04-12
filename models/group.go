@@ -14,4 +14,5 @@ type Group struct {
 	Polls           []Poll           `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Announcements   []Announcement   `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Posts           []Post           `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
+	Events          []Event          `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 }
