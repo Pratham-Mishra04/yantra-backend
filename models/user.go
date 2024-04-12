@@ -32,6 +32,7 @@ type User struct {
 	Moderator                 Moderator        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	OAuth                     OAuth            `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	Verification              UserVerification `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
+	Journal                   Journal          `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
 type Moderator struct {
