@@ -12,4 +12,6 @@ type Group struct {
 	NumberOfMembers int16            `gorm:"default:0" json:"noMembers"`
 	ResourceBucket  []ResourceBucket `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Polls           []Poll           `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
+	Announcements   []Announcement   `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
+	Posts           []Post           `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 }

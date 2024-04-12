@@ -29,6 +29,7 @@ type Config struct {
 	JWT_SECRET           string      `mapstructure:"JWT_SECRET"`
 	FRONTEND_URL         string      `mapstructure:"FRONTEND_URL"`
 	BACKEND_URL          string      `mapstructure:"BACKEND_URL"`
+	ML_URL               string      `mapstructure:"ML_URL"`
 	GMAIL_KEY            string      `mapstructure:"GMAIL_KEY"`
 	GOOGLE_CLIENT_ID     string      `mapstructure:"GOOGLE_CLIENT_ID"`
 	GOOGLE_CLIENT_SECRET string      `mapstructure:"GOOGLE_CLIENT_SECRET"`
