@@ -13,9 +13,7 @@ type Announcement struct {
 	Title         string         `gorm:"" json:"title"`
 	Content       string         `gorm:"not null" json:"content"`
 	IsEdited      bool           `gorm:"default:false" json:"isEdited"`
-	IsOpen        bool           `gorm:"default:false" json:"isOpen"`
 	CreatedAt     time.Time      `gorm:"default:current_timestamp" json:"createdAt"`
-	NoShares      int            `gorm:"default:0" json:"noShares"`
 	NoLikes       int            `gorm:"default:0" json:"noLikes"`
 	NoComments    int            `gorm:"default:0" json:"noComments"`
 	Comments      []Comment      `gorm:"foreignKey:AnnouncementID;constraint:OnDelete:CASCADE" json:"-"`
