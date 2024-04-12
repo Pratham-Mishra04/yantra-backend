@@ -137,8 +137,6 @@ func UpdatePassword(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Incorrect Password."}
 	}
 
-	//TODO send email for verification
-
 	hash, err := bcrypt.GenerateFromPassword([]byte(reqBody.NewPassword), 10)
 
 	if err != nil {
