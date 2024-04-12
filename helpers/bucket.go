@@ -23,6 +23,7 @@ type BucketClient struct {
 
 var UserProfileClient *BucketClient
 var UserCoverClient *BucketClient
+var ResourceClient *BucketClient
 
 func createNewBucketClient(uploadPath string, private bool) *BucketClient {
 	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", initializers.CONFIG.GCP_CREDS)
@@ -51,6 +52,7 @@ func createNewBucketClient(uploadPath string, private bool) *BucketClient {
 func InitializeBucketClients() {
 	UserProfileClient = createNewBucketClient("users/profilePics/", false)
 	UserCoverClient = createNewBucketClient("users/coverPics/", false)
+	ResourceClient = createNewBucketClient("resources/", initializers.CONFIG.ENV == initializers.ProductionEnv)
 }
 
 func (c *BucketClient) UploadBucketFile(buffer *bytes.Buffer, object string) error {
