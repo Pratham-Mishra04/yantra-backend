@@ -23,18 +23,26 @@ type User struct {
 	PasswordResetTokenExpires time.Time        `json:"-"`
 	PasswordChangedAt         time.Time        `gorm:"default:current_timestamp" json:"-"`
 	DeactivatedAt             time.Time        `gorm:"" json:"-"`
-	Admin                     bool             `gorm:"default:false" json:"-"`
-	Verified                  bool             `gorm:"default:false" json:"isVerified"`
-	OnboardingCompleted       bool             `gorm:"default:false" json:"isOnboardingComplete"`
+	IsModerator               bool             `gorm:"default:false" json:"isModerator"`
+	IsVerified                bool             `gorm:"default:false" json:"isVerified"`
+	IsOnboardingCompleted     bool             `gorm:"default:false" json:"isOnboardingComplete"`
 	LastLoggedIn              time.Time        `gorm:"default:current_timestamp" json:"-"`
-	Active                    bool             `gorm:"default:true" json:"-"`
+	IsActive                  bool             `gorm:"default:true" json:"-"`
 	CreatedAt                 time.Time        `gorm:"default:current_timestamp;index:idx_created_at,sort:desc" json:"-"`
 	OAuth                     OAuth            `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	Verification              UserVerification `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
+type Moderator struct {
+	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id"`
+	UserID     uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
+	IsDoctor   bool      `gorm:"default:false" json:"isDoctor"`
+	IsStudent  bool      `gorm:"default:false" json:"isStudent"`
+	University string    `json:"university"`
+}
+
 func (u *User) AfterFind(tx *gorm.DB) error {
-	if !u.Active {
+	if !u.IsActive {
 		u.Username = "deactived"
 		u.Name = "User"
 		u.CoverPic = "default.jpg"

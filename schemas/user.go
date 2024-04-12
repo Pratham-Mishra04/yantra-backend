@@ -10,6 +10,9 @@ type UserCreateSchema struct {
 	Email           string `json:"email" validate:"required,email"`
 	Password        string `json:"password" validate:"required,min=8"`
 	ConfirmPassword string `json:"confirmPassword" validate:"required,min=8"`
+	IsModerator     bool   `json:"isModerator" validate:"required"`
+	IsDoctor        bool   `json:"isDoctor" validate:"required"`
+	IsStudent       bool   `json:"isStudent" validate:"required"`
 }
 
 type UserUpdateSchema struct {

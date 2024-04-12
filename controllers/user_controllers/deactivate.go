@@ -44,7 +44,7 @@ func Deactivate(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Incorrect OTP"}
 	}
 
-	user.Active = false
+	user.IsActive = false
 	user.DeactivatedAt = time.Now()
 
 	if err := initializers.DB.Save(&user).Error; err != nil {

@@ -47,7 +47,7 @@ func SendVerificationCode(c *fiber.Ctx) error {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
-	if user.Verified {
+	if user.IsVerified {
 		return &fiber.Error{Code: 400, Message: "User is already verified"}
 	}
 
@@ -102,7 +102,7 @@ func VerifyCode(c *fiber.Ctx) error {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
-	if user.Verified {
+	if user.IsVerified {
 		return &fiber.Error{Code: 400, Message: "User is already verified"}
 	}
 
@@ -123,7 +123,7 @@ func VerifyCode(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "OTP has Expired, generate a new one"}
 	}
 
-	user.Verified = true
+	user.IsVerified = true
 	result := initializers.DB.Save(&user)
 	if result.Error != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}

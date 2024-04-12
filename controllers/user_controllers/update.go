@@ -97,9 +97,9 @@ func UpdateMe(c *fiber.Ctx) error {
 		go routines.DeleteFromBucket(helpers.UserCoverClient, oldCoverPic)
 	}
 
-	if c.Query("action", "") == "onboarding" && !user.OnboardingCompleted {
+	if c.Query("action", "") == "onboarding" && !user.IsOnboardingCompleted {
 		go func() {
-			user.OnboardingCompleted = true
+			user.IsOnboardingCompleted = true
 			if err := initializers.DB.Save(&user).Error; err != nil {
 				helpers.LogDatabaseError("Error while updating User-UpdateMe", err, "go_routine")
 			}
@@ -177,7 +177,7 @@ func UpdateEmail(c *fiber.Ctx) error {
 	}
 
 	user.Email = reqBody.Email
-	user.Verified = false
+	user.IsVerified = false
 
 	if err := initializers.DB.Save(&user).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}

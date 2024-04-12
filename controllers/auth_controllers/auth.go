@@ -77,12 +77,35 @@ func SignUp(c *fiber.Ctx) error {
 		Email:             reqBody.Email,
 		Password:          string(hash),
 		Username:          reqBody.Username,
+		IsModerator:       reqBody.IsModerator,
 		PasswordChangedAt: time.Now(),
 	}
 
-	result := initializers.DB.Create(&newUser)
+	tx := initializers.DB.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	result := tx.Create(&newUser)
 	if result.Error != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
+	}
+
+	if reqBody.IsModerator {
+		newModerator := models.Moderator{
+			UserID:    newUser.ID,
+			IsDoctor:  reqBody.IsDoctor,
+			IsStudent: reqBody.IsStudent,
+		}
+
+		result := tx.Create(&newModerator)
+		if result.Error != nil {
+			return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
 	c.Set("loggedInUserID", newUser.ID.String())
@@ -107,7 +130,10 @@ func SignUp(c *fiber.Ctx) error {
 func OAuthSignUp(c *fiber.Ctx) error {
 	loggedInUserID := c.GetRespHeader("loggedInUserID")
 	var reqBody struct {
-		Username string `json:"username" validate:"alphanum,required"`
+		Username    string `json:"username" validate:"required,max=16"`
+		IsModerator bool   `json:"isModerator" validate:"required"`
+		IsDoctor    bool   `json:"isDoctor" validate:"required"`
+		IsStudent   bool   `json:"isStudent" validate:"required"`
 	}
 
 	c.BodyParser(&reqBody)
@@ -129,22 +155,44 @@ func OAuthSignUp(c *fiber.Ctx) error {
 	}
 
 	user.Username = reqBody.Username
-	user.Verified = true
+	user.IsVerified = true
+	user.IsModerator = reqBody.IsModerator
 	oauth.OnBoardingCompleted = true
 
-	result := initializers.DB.Save(&user)
+	tx := initializers.DB.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	result := tx.Save(&user)
 	if result.Error != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
 	}
 
-	result = initializers.DB.Save(&oauth)
+	if reqBody.IsModerator {
+		newModerator := models.Moderator{
+			UserID:    user.ID,
+			IsDoctor:  reqBody.IsDoctor,
+			IsStudent: reqBody.IsStudent,
+		}
+
+		result := tx.Create(&newModerator)
+		if result.Error != nil {
+			return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
+		}
+	}
+
+	result = tx.Save(&oauth)
 	if result.Error != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
 	c.Set("loggedInUserID", user.ID.String())
 
-	// picName, err := utils.SaveFile(c, "profilePic", "user/profilePics", false, 500, 500)
 	picName, err := utils.UploadImage(c, "profilePic", helpers.UserProfileClient, 500, 500)
 	if err != nil {
 		initializers.Logger.Warnw("Error in Saving Profile Pic on Sign Up", "Err", err)
@@ -185,11 +233,11 @@ func LogIn(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "No account with these credentials found."}
 	}
 
-	if !user.Active {
+	if !user.IsActive {
 		if time.Now().After(user.DeactivatedAt.Add(30 * 24 * time.Hour)) {
 			return &fiber.Error{Code: 400, Message: "Cannot Log into a deactivated account."}
 		}
-		user.Active = true
+		user.IsActive = true
 	}
 
 	user.LastLoggedIn = time.Now()
@@ -213,11 +261,11 @@ func OAuthLogIn(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "No user with these credentials found."}
 	}
 
-	if !user.Active {
+	if !user.IsActive {
 		if time.Now().After(user.DeactivatedAt.Add(30 * 24 * time.Hour)) {
 			return &fiber.Error{Code: 400, Message: "Cannot Log into a deactivated account."}
 		}
-		user.Active = true
+		user.IsActive = true
 	}
 
 	user.LastLoggedIn = time.Now()
