@@ -29,6 +29,7 @@ type User struct {
 	LastLoggedIn              time.Time        `gorm:"default:current_timestamp" json:"-"`
 	IsActive                  bool             `gorm:"default:true" json:"-"`
 	CreatedAt                 time.Time        `gorm:"default:current_timestamp;index:idx_created_at,sort:desc" json:"-"`
+	Moderator                 Moderator        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	OAuth                     OAuth            `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	Verification              UserVerification `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 }

@@ -221,7 +221,7 @@ func LogIn(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	if err := initializers.DB.Session(&gorm.Session{SkipHooks: true}).First(&user, "username = ? AND organization_status = false", reqBody.Username).Error; err != nil {
+	if err := initializers.DB.Session(&gorm.Session{SkipHooks: true}).First(&user, "username = ?", reqBody.Username).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return &fiber.Error{Code: 400, Message: "No account with these credentials found."}
 		} else {
@@ -253,7 +253,7 @@ func OAuthLogIn(c *fiber.Ctx) error {
 	loggedInUserID := c.GetRespHeader("loggedInUserID")
 
 	var user models.User
-	if err := initializers.DB.Session(&gorm.Session{SkipHooks: true}).First(&user, "id = ? AND organization_status = false", loggedInUserID).Error; err != nil {
+	if err := initializers.DB.Session(&gorm.Session{SkipHooks: true}).First(&user, "id = ?", loggedInUserID).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
