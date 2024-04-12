@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func FetchPolls(c *fiber.Ctx) error {
+func GetPolls(c *fiber.Ctx) error {
 	orgID, err := uuid.Parse(c.Params("orgID"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid organization ID."}
