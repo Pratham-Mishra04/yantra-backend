@@ -11,6 +11,7 @@ func Config(app *fiber.App) {
 	EventRouter(app)
 	GroupRouter(app)
 	JournalRouter(app)
+	MessagingRouter(app)
 	OauthRouter(app)
 	PollRouter(app)
 	PostRouter(app)

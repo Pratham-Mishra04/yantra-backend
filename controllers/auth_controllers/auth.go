@@ -78,6 +78,7 @@ func SignUp(c *fiber.Ctx) error {
 		Password:          string(hash),
 		Username:          reqBody.Username,
 		IsModerator:       reqBody.IsModerator,
+		IsVerified:        true,
 		PasswordChangedAt: time.Now(),
 	}
 

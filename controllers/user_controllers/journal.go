@@ -74,8 +74,13 @@ func UpdatePage(c *fiber.Ctx) error {
 	pageID := c.Params("pageID")
 	loggedInUserID := c.GetRespHeader("loggedInUserID")
 
+	var journal models.Journal
+	if err := initializers.DB.First(&journal, "user_id=?", loggedInUserID).Error; err != nil {
+		return helpers.AppError{Code: fiber.StatusInternalServerError, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
 	var page models.Page
-	if err := initializers.DB.First(&page, "id = ? and user_id=?", pageID, loggedInUserID).Error; err != nil {
+	if err := initializers.DB.First(&page, "id = ? and journal_id=?", pageID, journal.ID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return &fiber.Error{Code: 400, Message: "No Page of this ID found."}
 		}

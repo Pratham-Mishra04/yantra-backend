@@ -40,34 +40,17 @@ func UpdateMe(c *fiber.Ctx) error {
 	oldProfilePic := user.ProfilePic
 	oldCoverPic := user.CoverPic
 
-	// picName, err := utils.SaveFile(c, "profilePic", "user/profilePics", true, 500, 500)
 	picName, err := utils.UploadImage(c, "profilePic", helpers.UserProfileClient, 500, 500)
 	if err != nil {
 		return err
 	}
 	reqBody.ProfilePic = &picName
 
-	// coverName, err := utils.SaveFile(c, "coverPic", "user/coverPics", true, 900, 400)
 	coverName, err := utils.UploadImage(c, "coverPic", helpers.UserCoverClient, 900, 400)
 	if err != nil {
 		return err
 	}
 	reqBody.CoverPic = &coverName
-
-	// updateUserValue := reflect.ValueOf(&reqBody).Elem()
-	// userValue := reflect.ValueOf(&user).Elem()
-
-	// for i := 0; i < updateUserValue.NumField(); i++ {
-	// 	field := updateUserValue.Type().Field(i)
-	// 	fieldName := field.Name
-
-	// 	if fieldValue := updateUserValue.Field(i); fieldValue.IsValid() && !fieldValue.IsZero() {
-	// 		userField := userValue.FieldByName(fieldName)
-	// 		if userField.IsValid() && userField.CanSet() {
-	// 			userField.Set(fieldValue)
-	// 		}
-	// 	}
-	// }
 
 	if reqBody.Name != nil {
 		user.Name = *reqBody.Name
