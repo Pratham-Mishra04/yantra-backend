@@ -41,3 +41,43 @@ func ModeratorOnly(c *fiber.Ctx) error {
 
 	return c.Next()
 }
+
+func BucketAuthorization(action string) func(*fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		loggedInUserID := c.GetRespHeader("loggedInUserID")
+		groupID := c.GetRespHeader("groupID")
+		resourceBucketID := c.Params("resourceBucketID")
+
+		var group models.Group
+		if err := initializers.DB.Preload("Moderator").Where("id = ?", groupID).First(&group).Error; err != nil {
+			return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+		}
+
+		var resourceBucket models.ResourceBucket
+
+		if err := initializers.DB.Where("id=? AND group_id = ?", resourceBucketID, groupID).First(&resourceBucket).Error; err != nil {
+			if err != gorm.ErrRecordNotFound {
+				return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Resource Bucket does not exist."}
+			}
+			return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+		}
+
+		if loggedInUserID == group.Moderator.UserID.String() {
+			return c.Next()
+		}
+
+		check := false
+
+		if action == "view" && !resourceBucket.OnlyAdminViewAccess {
+			check = true
+		} else if action == "edit" && !resourceBucket.OnlyAdminEditAccess {
+			check = true
+		}
+
+		if !check {
+			return &fiber.Error{Code: 403, Message: "Cannot access this Resource Bucket."}
+		}
+
+		return c.Next()
+	}
+}
