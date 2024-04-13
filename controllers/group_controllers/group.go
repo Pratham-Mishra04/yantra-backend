@@ -62,7 +62,7 @@ func GetGroup(c *fiber.Ctx) error {
 	// }
 
 	var group models.Group
-	if err := initializers.DB.Where("id = ?", groupID).First(&group).Error; err != nil {
+	if err := initializers.DB.Preload("Moderator").Preload("Moderator.User").Preload("Memberships").Preload("Memberships.User").Where("id = ?", groupID).First(&group).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
