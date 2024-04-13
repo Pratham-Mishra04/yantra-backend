@@ -9,7 +9,7 @@ import (
 func EventRouter(app *fiber.App) {
 	eventRoutes := app.Group("/event", middlewares.Protect, middlewares.AttachGroupHeader)
 	eventRoutes.Get("/", group_controllers.GetEvents)
-	eventRoutes.Post("/", middlewares.ModeratorOnly, group_controllers.AddAnnouncement)
+	eventRoutes.Post("/", middlewares.ModeratorOnly, group_controllers.AddEvent)
 
 	eventRoutes.Get("/:eventID", group_controllers.GetEvent)
 

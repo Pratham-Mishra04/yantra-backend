@@ -25,4 +25,5 @@ type Poll struct {
 	IsMultiAnswer bool      `gorm:"default:false" json:"isMultiAnswer"`
 	IsEdited      bool      `gorm:"default:false" json:"isEdited"`
 	TotalVotes    int       `gorm:"default:0" json:"totalVotes"`
+	CreatedAt     time.Time `gorm:"default:current_timestamp" json:"createdAt"`
 }

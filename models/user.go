@@ -29,7 +29,6 @@ type User struct {
 	LastLoggedIn              time.Time        `gorm:"default:current_timestamp" json:"-"`
 	IsActive                  bool             `gorm:"default:true" json:"-"`
 	CreatedAt                 time.Time        `gorm:"default:current_timestamp;index:idx_created_at,sort:desc" json:"-"`
-	Moderator                 Moderator        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	OAuth                     OAuth            `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	Verification              UserVerification `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
 	Journal                   Journal          `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
@@ -40,6 +39,7 @@ type User struct {
 type Moderator struct {
 	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id"`
 	UserID     uuid.UUID `gorm:"type:uuid;not null" json:"userID"`
+	User       User      `gorm:"" json:"user"`
 	IsDoctor   bool      `gorm:"default:false" json:"isDoctor"`
 	IsStudent  bool      `gorm:"default:false" json:"isStudent"`
 	University string    `json:"university"`

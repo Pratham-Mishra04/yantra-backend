@@ -17,6 +17,8 @@ func GroupRouter(app *fiber.App) {
 	groupRoutes.Post("/initial", group_controllers.JoinInitialGroup)
 	groupRoutes.Post("/join/:groupID", group_controllers.JoinGroup)
 
+	groupRoutes.Get("/feed", middlewares.AttachGroupHeader, group_controllers.GetCombinedFeed)
+
 	groupRoutes.Patch("/", group_controllers.EditGroup)
 	groupRoutes.Delete("/", group_controllers.DeleteGroup)
 }
