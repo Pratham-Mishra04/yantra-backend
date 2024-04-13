@@ -1,6 +1,0 @@
-/public
-.env*
-/scripts
-/logs
-/database
-bucket-key*.json
