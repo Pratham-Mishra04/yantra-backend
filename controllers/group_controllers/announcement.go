@@ -13,6 +13,7 @@ import (
 )
 
 func GetAnnouncements(c *fiber.Ctx) error {
+	//TODO instead of taking groupID, fetch the group if which the user in and display it's content
 	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
@@ -59,7 +60,7 @@ func AddAnnouncement(c *fiber.Ctx) error {
 	})
 }
 
-func EditAnnouncement(c *fiber.Ctx) error {
+func UpdateAnnouncement(c *fiber.Ctx) error {
 	var reqBody schemas.AnnouncementUpdateSchema
 	if err := c.BodyParser(&reqBody); err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Req Body"}

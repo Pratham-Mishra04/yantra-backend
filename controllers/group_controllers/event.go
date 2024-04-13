@@ -11,6 +11,7 @@ import (
 	"github.com/Pratham-Mishra04/yantra-backend/routines"
 	"github.com/Pratham-Mishra04/yantra-backend/schemas"
 	"github.com/Pratham-Mishra04/yantra-backend/utils"
+	API "github.com/Pratham-Mishra04/yantra-backend/utils/APIFeatures"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -39,6 +40,25 @@ func GetEvent(c *fiber.Ctx) error {
 		"status":  "success",
 		"message": "",
 		"event":   event,
+	})
+}
+
+func GetEvents(c *fiber.Ctx) error {
+	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	if err != nil {
+		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
+	}
+
+	paginatedDB := API.Paginator(c)(initializers.DB)
+
+	var events []models.Event
+	if err := paginatedDB.Where("group_id = ?", parsedGroupID).Order("created_at DESC").Find(&events).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status": "success",
+		"events": events,
 	})
 }
 

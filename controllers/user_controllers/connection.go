@@ -95,7 +95,7 @@ func SendConnectionRequest(c *fiber.Ctx) error {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+	return c.Status(201).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Connection Request Sent",
 	})
