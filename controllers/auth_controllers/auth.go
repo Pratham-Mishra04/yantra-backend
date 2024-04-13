@@ -112,7 +112,7 @@ func SignUp(c *fiber.Ctx) error {
 
 	picName, err := utils.UploadImage(c, "profilePic", helpers.UserProfileClient, 500, 500)
 	if err != nil {
-		initializers.Logger.Warnw("Error in Saving Profile Pic on Sign Up", "Err", err)
+		go initializers.Logger.Warnw("Error in Saving Profile Pic on Sign Up", "Err", err)
 	} else {
 		if picName != "" {
 			newUser.ProfilePic = picName

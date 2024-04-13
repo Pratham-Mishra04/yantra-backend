@@ -11,6 +11,7 @@ type Event struct {
 	ID            uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id"`
 	GroupID       uuid.UUID      `gorm:"type:uuid;not null" json:"groupID"`
 	Group         Group          `gorm:"" json:"group"`
+	DyteID        string         `gorm:"" json:"dyteID"`
 	Title         string         `gorm:"type:text;not null" json:"title"`
 	Tagline       string         `gorm:"type:text" json:"tagline"`
 	CoverPic      string         `gorm:"type:text; default:default.jpg" json:"coverPic"`

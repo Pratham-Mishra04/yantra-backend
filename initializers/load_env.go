@@ -38,6 +38,7 @@ type Config struct {
 	GCP_PUBLIC_BUCKET    string      `mapstructure:"GCP_PUBLIC_BUCKET"`
 	GCP_PRIVATE_BUCKET   string      `mapstructure:"GCP_PRIVATE_BUCKET"`
 	GCP_CREDS            string      `mapstructure:"GCP_CREDS"`
+	DYTE_API_KEY         string      `mapstructure:"DYTE_API_KEY"`
 }
 
 var CONFIG Config
