@@ -11,6 +11,44 @@ import (
 	"gorm.io/gorm"
 )
 
+func JoinInitialGroup(c *fiber.Ctx) error {
+	parsedUserID, _ := uuid.Parse(c.GetRespHeader("loggedInUserID"))
+
+	var group models.Group
+	if err := initializers.DB.First(&group).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	membership := models.GroupMembership{
+		UserID:  parsedUserID,
+		GroupID: group.ID,
+	}
+
+	if err := initializers.DB.Create(&membership).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status":     "success",
+		"message":    "",
+		"group":      group,
+		"membership": membership,
+	})
+}
+
+func GetRecommendedGroups(c *fiber.Ctx) error {
+	var groups []models.Group
+	if err := initializers.DB.Find(&groups).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status":  "success",
+		"message": "",
+		"groups":  groups,
+	})
+}
+
 func GetGroup(c *fiber.Ctx) error {
 	groupID := c.Params("groupID")
 
@@ -38,13 +76,22 @@ func GetGroup(c *fiber.Ctx) error {
 }
 
 func CreateGroup(c *fiber.Ctx) error {
-	var reqBody schemas.AnnouncementCreateSchema
+	var reqBody schemas.GroupCreateSchema
 	if err := c.BodyParser(&reqBody); err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Req Body"}
 	}
 
+	parsedUserID, _ := uuid.Parse(c.GetRespHeader("loggedInUserID"))
+
+	var moderator models.Moderator
+	if err := initializers.DB.Where("user_id = ?", parsedUserID).First(&moderator).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
 	group := models.Group{
-		Title: reqBody.Title,
+		Title:       reqBody.Title,
+		Description: reqBody.Description,
+		ModeratorID: moderator.ID,
 	}
 
 	if err := initializers.DB.Create(&group).Error; err != nil {
@@ -83,5 +130,35 @@ func DeleteGroup(c *fiber.Ctx) error {
 	return c.Status(204).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Group Deleted",
+	})
+}
+
+func JoinGroup(c *fiber.Ctx) error {
+	parsedUserID, _ := uuid.Parse(c.GetRespHeader("loggedInUserID"))
+
+	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid Group ID."}
+	}
+
+	var group models.Group
+	if err := initializers.DB.Where("id = ", parsedGroupID).First(&group).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	membership := models.GroupMembership{
+		UserID:  parsedUserID,
+		GroupID: group.ID,
+	}
+
+	if err := initializers.DB.Create(&membership).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status":     "success",
+		"message":    "",
+		"group":      group,
+		"membership": membership,
 	})
 }
