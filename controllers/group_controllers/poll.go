@@ -13,16 +13,16 @@ import (
 )
 
 func GetPolls(c *fiber.Ctx) error {
-	orgID, err := uuid.Parse(c.Params("orgID"))
+	groupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
-		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid organization ID."}
+		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid Group ID."}
 	}
 
 	paginatedDB := API.Paginator(c)(initializers.DB)
 
 	db := paginatedDB.Preload("Options", func(db *gorm.DB) *gorm.DB {
 		return db.Order("options.created_at DESC")
-	}).Preload("Options.VotedBy", LimitedUsers).Where("organization_id = ?", orgID)
+	}).Preload("Options.VotedBy", LimitedUsers).Where("group_id = ?", groupID)
 
 	var polls []models.Poll
 	if err := db.Order("created_at DESC").Find(&polls).Error; err != nil {
@@ -45,7 +45,7 @@ func CreatePoll(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid request body."}
 	}
 
-	groupID, _ := uuid.Parse(c.Params("groupID"))
+	groupID, _ := uuid.Parse(c.GetRespHeader("groupID"))
 
 	var poll = models.Poll{
 		GroupID:       groupID,

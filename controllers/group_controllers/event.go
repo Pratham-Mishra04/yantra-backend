@@ -44,7 +44,7 @@ func GetEvent(c *fiber.Ctx) error {
 }
 
 func GetEvents(c *fiber.Ctx) error {
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -72,7 +72,7 @@ func AddEvent(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: err.Error()}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Organization ID."}
 	}
@@ -201,7 +201,7 @@ func DeleteEvent(c *fiber.Ctx) error {
 	//TODO add OTP
 	eventID := c.Params("eventID")
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}

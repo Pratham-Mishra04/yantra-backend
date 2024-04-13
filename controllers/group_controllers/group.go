@@ -98,6 +98,15 @@ func CreateGroup(c *fiber.Ctx) error {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
+	membership := models.GroupMembership{
+		UserID:  parsedUserID,
+		GroupID: group.ID,
+	}
+
+	if err := initializers.DB.Create(&membership).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Group Created",
@@ -142,7 +151,7 @@ func JoinGroup(c *fiber.Ctx) error {
 	}
 
 	var group models.Group
-	if err := initializers.DB.Where("id = ", parsedGroupID).First(&group).Error; err != nil {
+	if err := initializers.DB.Where("id = ?", parsedGroupID).First(&group).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
@@ -150,6 +159,8 @@ func JoinGroup(c *fiber.Ctx) error {
 		UserID:  parsedUserID,
 		GroupID: group.ID,
 	}
+
+	//TODO increase no of members of the group.
 
 	if err := initializers.DB.Create(&membership).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}

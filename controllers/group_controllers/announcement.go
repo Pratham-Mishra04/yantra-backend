@@ -13,8 +13,7 @@ import (
 )
 
 func GetAnnouncements(c *fiber.Ctx) error {
-	//TODO instead of taking groupID, fetch the group if which the user in and display it's content
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -38,7 +37,7 @@ func AddAnnouncement(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Req Body"}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -71,7 +70,7 @@ func UpdateAnnouncement(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Announcement ID."}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -109,7 +108,7 @@ func DeleteAnnouncement(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Announcement ID."}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid Group ID."}
 	}

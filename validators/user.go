@@ -1,7 +1,6 @@
 package validators
 
 import (
-	"github.com/Pratham-Mishra04/yantra-backend/helpers"
 	"github.com/Pratham-Mishra04/yantra-backend/initializers"
 	"github.com/Pratham-Mishra04/yantra-backend/models"
 	"github.com/Pratham-Mishra04/yantra-backend/schemas"
@@ -17,9 +16,9 @@ func UserCreateValidator(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Req Body"}
 	}
 
-	if err := helpers.Validate[schemas.UserCreateSchema](reqBody); err != nil {
-		return &fiber.Error{Code: 400, Message: err.Error()}
-	}
+	// if err := helpers.Validate[schemas.UserCreateSchema](reqBody); err != nil {
+	// 	return &fiber.Error{Code: 400, Message: err.Error()}
+	// }
 
 	var user models.User
 	initializers.DB.Session(&gorm.Session{SkipHooks: true}).First(&user, "email = ?", reqBody.Email)

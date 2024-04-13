@@ -18,7 +18,7 @@ import (
 )
 
 func GetResourceBuckets(c *fiber.Ctx) error {
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -41,7 +41,7 @@ func GetResourceBucketFiles(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Resource Bucket ID."}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -107,7 +107,7 @@ func AddResourceBucket(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Req Body"}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -142,7 +142,7 @@ func AddResourceFile(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Resource Bucket ID."}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -222,7 +222,7 @@ func EditResourceBucket(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Resource Bucket ID."}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
@@ -312,7 +312,7 @@ func DeleteResourceBucket(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Resource Bucket ID."}
 	}
 
-	parsedGroupID, err := uuid.Parse(c.Params("groupID"))
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "Invalid Group ID."}
 	}
@@ -349,7 +349,7 @@ func DeleteResourceFile(c *fiber.Ctx) error {
 		return &fiber.Error{Code: 400, Message: "Invalid Resource Bucket ID."}
 	}
 
-	parsedUserID, err := uuid.Parse(c.GetRespHeader("orgMemberID"))
+	parsedUserID, err := uuid.Parse(c.GetRespHeader("loggedInUserID"))
 	if err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Member ID."}
 	}

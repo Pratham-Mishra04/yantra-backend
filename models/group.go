@@ -12,7 +12,7 @@ type Group struct {
 	Description     string           `gorm:"type:text;not null" json:"description"`
 	ModeratorID     uuid.UUID        `gorm:"type:uuid;not null" json:"journalID"`
 	Moderator       Moderator        `gorm:"" json:"moderator"`
-	NumberOfMembers int16            `gorm:"default:0" json:"noMembers"`
+	NumberOfMembers int16            `gorm:"default:1" json:"noMembers"`
 	ResourceBucket  []ResourceBucket `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Polls           []Poll           `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Announcements   []Announcement   `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`

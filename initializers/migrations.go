@@ -15,6 +15,7 @@ func AutoMigrate() {
 		&models.Connection{},
 		&models.Event{},
 		&models.Group{},
+		&models.GroupMembership{},
 		&models.Journal{},
 		&models.Notification{},
 		&models.Option{},

@@ -33,7 +33,7 @@ func GetMyPosts(c *fiber.Ctx) error {
 }
 
 func GetPosts(c *fiber.Ctx) error {
-	groupID := c.Params("groupID")
+	groupID := c.GetRespHeader("groupID")
 
 	paginatedDB := API.Paginator(c)(initializers.DB)
 
@@ -51,6 +51,11 @@ func GetPosts(c *fiber.Ctx) error {
 }
 
 func AddPost(c *fiber.Ctx) error {
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
+	if err != nil {
+		return &fiber.Error{Code: 500, Message: "Error Parsing the Group ID."}
+	}
+
 	var reqBody schemas.PostCreateSchema
 	if err := c.BodyParser(&reqBody); err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Req Body"}
@@ -83,6 +88,7 @@ func AddPost(c *fiber.Ctx) error {
 		Content: reqBody.Content,
 		Images:  images,
 		Tags:    reqBody.Tags,
+		GroupID: parsedGroupID,
 	}
 
 	result := initializers.DB.Create(&newPost)
