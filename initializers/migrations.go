@@ -27,6 +27,11 @@ func AutoMigrate() {
 		&models.ResourceFile{},
 		&models.Review{},
 
+		&models.Chat{},
+		&models.Message{},
+		&models.GroupChat{},
+		&models.GroupChatMessage{},
+
 		&models.UserVerification{},
 		&models.OAuth{},
 	)
