@@ -7,10 +7,10 @@ import (
 )
 
 func AnnouncementRouter(app *fiber.App) {
-	announcementRoutes := app.Group("/announcement", middlewares.Protect)
+	announcementRoutes := app.Group("/announcement", middlewares.Protect, middlewares.AttachGroupHeader)
 	announcementRoutes.Get("/", group_controllers.GetAnnouncements)
-	announcementRoutes.Post("/", group_controllers.AddAnnouncement)
+	announcementRoutes.Post("/", middlewares.ModeratorOnly, group_controllers.AddAnnouncement)
 
-	announcementRoutes.Patch("/:pageID", group_controllers.UpdateAnnouncement)
-	announcementRoutes.Delete("/:pageID", group_controllers.DeleteAnnouncement)
+	announcementRoutes.Patch("/:announcementID", middlewares.ModeratorOnly, group_controllers.UpdateAnnouncement)
+	announcementRoutes.Delete("/:announcementID", middlewares.ModeratorOnly, group_controllers.DeleteAnnouncement)
 }

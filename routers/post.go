@@ -7,12 +7,12 @@ import (
 )
 
 func PostRouter(app *fiber.App) {
-	postRoutes := app.Group("/event", middlewares.Protect)
+	postRoutes := app.Group("/event", middlewares.Protect, middlewares.AttachGroupHeader)
 	postRoutes.Get("/", group_controllers.GetPosts)
-	postRoutes.Post("/", group_controllers.AddPost)
+	postRoutes.Post("/", middlewares.ModeratorOnly, group_controllers.AddPost)
 
 	postRoutes.Get("/my", group_controllers.GetMyPosts)
 
-	postRoutes.Patch("/:pageID", group_controllers.UpdatePost)
-	postRoutes.Delete("/:pageID", group_controllers.DeletePost)
+	postRoutes.Patch("/:postID", middlewares.ModeratorOnly, group_controllers.UpdatePost)
+	postRoutes.Delete("/:postID", middlewares.ModeratorOnly, group_controllers.DeletePost)
 }
