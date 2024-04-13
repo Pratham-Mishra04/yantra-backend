@@ -11,7 +11,8 @@ func GroupRouter(app *fiber.App) {
 	groupRoutes.Get("/recommended", group_controllers.GetRecommendedGroups)
 
 	groupRoutes.Get("/feed", middlewares.AttachGroupHeader, group_controllers.GetCombinedFeed)
-	groupRoutes.Get("/:groupID", middlewares.AttachGroupHeader, group_controllers.GetGroup)
+	groupRoutes.Get("/my", middlewares.AttachGroupHeader, group_controllers.GetGroup)
+
 	//TODO only isModerator can access
 	groupRoutes.Post("/", group_controllers.CreateGroup)
 
