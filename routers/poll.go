@@ -7,7 +7,7 @@ import (
 )
 
 func PollRouter(app *fiber.App) {
-	pollRouter := app.Group("/org/:orgID/polls", middlewares.Protect)
+	pollRouter := app.Group("/poll", middlewares.Protect)
 	pollRouter.Get("/", group_controllers.GetPolls)
 
 	pollRouter.Post("/", group_controllers.CreatePoll)

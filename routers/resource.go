@@ -7,7 +7,7 @@ import (
 )
 
 func ResourceRouter(app *fiber.App) {
-	app.Get("resources/:groupID/serve/:resourceFileID", group_controllers.ServeResourceFile)
+	app.Get("resource/:groupID/serve/:resourceFileID", group_controllers.ServeResourceFile)
 
 	resourceRoutes := app.Group("/org/:orgID/resource", middlewares.Protect)
 

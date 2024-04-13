@@ -16,7 +16,7 @@ func UserRouter(app *fiber.App) {
 	app.Post("/recovery", auth_controllers.SendResetURL)
 	app.Post("/recovery/verify", auth_controllers.ResetPassword)
 
-	userRoutes := app.Group("/users", middlewares.Protect)
+	userRoutes := app.Group("/user", middlewares.Protect)
 	userRoutes.Get("/me", user_controllers.GetMe)
 
 	userRoutes.Patch("/update_password", user_controllers.UpdatePassword)
