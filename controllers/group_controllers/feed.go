@@ -48,6 +48,7 @@ func GetCombinedFeed(c *fiber.Ctx) error {
 			return db.Select(utils.UserSelect)
 		}).
 		Preload("Group").
+		Preload("Group.Moderator").
 		Preload("Group.Moderator.User", func(db *gorm.DB) *gorm.DB {
 			return db.Select(utils.UserSelect)
 		}).
@@ -63,6 +64,7 @@ func GetCombinedFeed(c *fiber.Ctx) error {
 	var announcements []models.Announcement
 	if err := paginatedDB.
 		Preload("Group").
+		Preload("Group.Moderator").
 		Preload("Group.Moderator.User", func(db *gorm.DB) *gorm.DB {
 			return db.Select(utils.UserSelect)
 		}).
@@ -76,6 +78,7 @@ func GetCombinedFeed(c *fiber.Ctx) error {
 
 	db := paginatedDB.
 		Preload("Group").
+		Preload("Group.Moderator").
 		Preload("Group.Moderator.User", func(db *gorm.DB) *gorm.DB {
 			return db.Select(utils.UserSelect)
 		}).

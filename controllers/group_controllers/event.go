@@ -30,7 +30,7 @@ func GetEvent(c *fiber.Ctx) error {
 	}
 
 	var event models.Event
-	if err := initializers.DB.Where("id = ?", eventID).First(&event).Error; err != nil {
+	if err := initializers.DB.Preload("Group").Preload("Group.Moderator").Preload("Group.Moderator.User").Where("id = ?", eventID).First(&event).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
@@ -52,7 +52,7 @@ func GetEvents(c *fiber.Ctx) error {
 	paginatedDB := API.Paginator(c)(initializers.DB)
 
 	var events []models.Event
-	if err := paginatedDB.Where("group_id = ?", parsedGroupID).Order("created_at DESC").Find(&events).Error; err != nil {
+	if err := paginatedDB.Preload("Group").Preload("Group.Moderator").Preload("Group.Moderator.User").Where("group_id = ?", parsedGroupID).Order("created_at DESC").Find(&events).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 

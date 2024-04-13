@@ -12,6 +12,7 @@ type Post struct {
 	UserID     uuid.UUID      `gorm:"type:uuid;not null" json:"userID"`
 	User       User           `gorm:"" json:"user"`
 	GroupID    uuid.UUID      `gorm:"type:uuid;not null" json:"groupID"`
+	Group      Group          `gorm:"" json:"group"`
 	Content    string         `gorm:"type:text;not null" json:"content"`
 	CreatedAt  time.Time      `gorm:"default:current_timestamp" json:"postedAt"`
 	Images     pq.StringArray `gorm:"type:text[]" json:"images"`

@@ -50,7 +50,7 @@ func GetRecommendedGroups(c *fiber.Ctx) error {
 }
 
 func GetGroup(c *fiber.Ctx) error {
-	groupID := c.Params("groupID")
+	groupID := c.GetRespHeader("groupID")
 
 	// groupInCache, err := cache.GetGroup(groupID)
 	// if err == nil {
