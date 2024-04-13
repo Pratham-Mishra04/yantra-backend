@@ -70,9 +70,9 @@ func AddPost(c *fiber.Ctx) error {
 	if err := initializers.DB.Where("id=?", parsedLoggedInUserID).First(&user).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
-	if !user.IsVerified {
-		return &fiber.Error{Code: 401, Message: config.VERIFICATION_ERROR}
-	}
+	// if !user.IsVerified {
+	// 	return &fiber.Error{Code: 401, Message: config.VERIFICATION_ERROR}
+	// }
 
 	if err := helpers.Validate[schemas.PostCreateSchema](reqBody); err != nil {
 		return &fiber.Error{Code: 400, Message: err.Error()}

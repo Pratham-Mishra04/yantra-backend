@@ -7,7 +7,7 @@ import (
 )
 
 func PostRouter(app *fiber.App) {
-	postRoutes := app.Group("/event", middlewares.Protect, middlewares.AttachGroupHeader)
+	postRoutes := app.Group("/post", middlewares.Protect, middlewares.AttachGroupHeader)
 	postRoutes.Get("/", group_controllers.GetPosts)
 	postRoutes.Post("/", middlewares.ModeratorOnly, group_controllers.AddPost)
 

@@ -104,6 +104,15 @@ func SignUp(c *fiber.Ctx) error {
 		}
 	}
 
+	journal := models.Journal{
+		UserID: newUser.ID,
+	}
+
+	result = tx.Create(&journal)
+	if result.Error != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
+	}
+
 	if err := tx.Commit().Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
@@ -245,6 +254,13 @@ func LogIn(c *fiber.Ctx) error {
 	if err := initializers.DB.Save(&user).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
+
+	//TODO remove this later
+	journal := models.Journal{
+		UserID: user.ID,
+	}
+
+	initializers.DB.Create(&journal)
 
 	return CreateSendToken(c, user, 200, "Logged In")
 }

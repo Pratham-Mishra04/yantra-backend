@@ -13,6 +13,6 @@ func EventRouter(app *fiber.App) {
 
 	eventRoutes.Get("/:eventID", group_controllers.GetEvent)
 
-	eventRoutes.Patch("/:eventID", middlewares.ModeratorOnly, group_controllers.UpdateAnnouncement)
-	eventRoutes.Delete("/:eventID", middlewares.ModeratorOnly, group_controllers.DeleteAnnouncement)
+	eventRoutes.Patch("/:eventID", middlewares.ModeratorOnly, group_controllers.UpdateEvent)
+	eventRoutes.Delete("/:eventID", middlewares.ModeratorOnly, group_controllers.DeleteEvent)
 }

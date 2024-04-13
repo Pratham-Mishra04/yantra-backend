@@ -1,6 +1,8 @@
 package user_controllers
 
 import (
+	"time"
+
 	"github.com/Pratham-Mishra04/yantra-backend/config"
 	"github.com/Pratham-Mishra04/yantra-backend/helpers"
 	"github.com/Pratham-Mishra04/yantra-backend/initializers"
@@ -15,9 +17,15 @@ func GetPages(c *fiber.Ctx) error {
 
 	paginatedDB := API.Paginator(c)(initializers.DB)
 
+	var journal models.Journal
+	if err := initializers.DB.
+		Where("user_id = ?", userID).First(&journal).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
 	var pages []models.Page
-	if err := paginatedDB.Preload("User").
-		Where("user_id = ?", userID).Find(&pages).Error; err != nil {
+	if err := paginatedDB.
+		Where("journal_id = ?", journal.ID).Find(&pages).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
@@ -30,6 +38,7 @@ func GetPages(c *fiber.Ctx) error {
 
 func CreatePage(c *fiber.Ctx) error {
 	var reqBody struct {
+		Title   string `json:"title" validate:"max=50"`
 		Content string `json:"content" validate:"required,max=2500"`
 	}
 
@@ -45,6 +54,7 @@ func CreatePage(c *fiber.Ctx) error {
 	}
 
 	page := models.Page{
+		Title:     reqBody.Title,
 		Content:   reqBody.Content,
 		JournalID: journal.ID,
 	}
@@ -56,6 +66,7 @@ func CreatePage(c *fiber.Ctx) error {
 	return c.Status(201).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Page created!",
+		"page":    page,
 	})
 }
 
@@ -72,12 +83,17 @@ func UpdatePage(c *fiber.Ctx) error {
 	}
 
 	var reqBody struct {
+		Title   string `json:"title" validate:"max=50"`
 		Content string `json:"content" validate:"required,max=2500"`
 	}
 
 	if err := c.BodyParser(&reqBody); err != nil {
 		return &fiber.Error{Code: 400, Message: "Invalid Request Body."}
 	}
+
+	page.Title = reqBody.Title
+	page.Content = reqBody.Content
+	page.UpdatedAt = time.Now()
 
 	if err := initializers.DB.Save(&page).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
@@ -86,6 +102,7 @@ func UpdatePage(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Page updated successfully",
+		"page":    page,
 	})
 }
 

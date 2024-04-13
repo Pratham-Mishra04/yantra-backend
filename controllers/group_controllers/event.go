@@ -74,7 +74,7 @@ func AddEvent(c *fiber.Ctx) error {
 
 	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
 	if err != nil {
-		return &fiber.Error{Code: 400, Message: "Invalid Organization ID."}
+		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
 	}
 
 	picName, err := utils.UploadImage(c, "coverPic", helpers.EventClient, 1920, 1080)
@@ -84,12 +84,14 @@ func AddEvent(c *fiber.Ctx) error {
 
 	startTime, err := time.Parse(time.RFC3339, reqBody.StartTime)
 	if err != nil {
-		return &fiber.Error{Code: 400, Message: "Invalid Start Time."}
+		startTime = time.Now()
+		// return &fiber.Error{Code: 400, Message: "Invalid Start Time."}
 	}
 
 	endTime, err := time.Parse(time.RFC3339, reqBody.EndTime)
 	if err != nil || endTime.Before(startTime) {
-		return &fiber.Error{Code: 400, Message: "Invalid End Time."}
+		endTime = time.Now()
+		// return &fiber.Error{Code: 400, Message: "Invalid End Time."}
 	}
 
 	event := models.Event{
@@ -112,6 +114,11 @@ func AddEvent(c *fiber.Ctx) error {
 	result := initializers.DB.Create(&event)
 	if result.Error != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: result.Error.Error(), Err: result.Error}
+	}
+
+	err = helpers.CreateDyteMeeting(&event)
+	if err != nil {
+		return err
 	}
 
 	routines.GetImageBlurHash(c, "coverPic", &event)
@@ -165,6 +172,7 @@ func UpdateEvent(c *fiber.Ctx) error {
 		event.Links = reqBody.Links
 	}
 	if reqBody.StartTime != "" {
+		//TODO update on dyte
 		startTime, err := time.Parse(time.RFC3339, reqBody.StartTime)
 		if err != nil {
 			return &fiber.Error{Code: 400, Message: "Invalid Start Time."}
@@ -226,5 +234,39 @@ func DeleteEvent(c *fiber.Ctx) error {
 	return c.Status(204).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Event deleted successfully",
+	})
+}
+
+func JoinLiveEvent(c *fiber.Ctx) error {
+	eventID := c.Params("eventID")
+	parsedGroupID, err := uuid.Parse(c.GetRespHeader("groupID"))
+	if err != nil {
+		return &fiber.Error{Code: 400, Message: "Invalid Group ID."}
+	}
+
+	var event models.Event
+	if err := initializers.DB.Preload("Group").Preload("Group.Moderator").Where("id = ? AND group_id=?", eventID, parsedGroupID).First(&event).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &fiber.Error{Code: 400, Message: "No Event of this ID found."}
+		}
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	parsedUserID, _ := uuid.Parse(c.GetRespHeader("loggedInUserID"))
+
+	var user models.User
+	if err := initializers.DB.Where("id = ?", parsedUserID).First(&user).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	authToken, err := helpers.GetDyteMeetingAuthToken(&event, &user)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status":    "success",
+		"message":   "",
+		"authToken": authToken,
 	})
 }

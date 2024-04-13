@@ -110,8 +110,14 @@ func GetCombinedFeed(c *fiber.Ctx) error {
 		return combinedFeed[i].GetCreatedAt().After(combinedFeed[j].GetCreatedAt())
 	})
 
+	var group models.Group
+	if err := initializers.DB.Preload("Moderator").Preload("Moderator.User").Where("id = ?", parsedGroupID).First(&group).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status": "success",
 		"feed":   combinedFeed,
+		"group":  group,
 	})
 }
