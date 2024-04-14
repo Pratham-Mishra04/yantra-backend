@@ -94,22 +94,21 @@ func NERExtractionFromOnboarding(content string) []string {
 		return nil
 	}
 
-	// Unmarshal the response body into a map
-	var response map[string]interface{}
+	var response []map[string]interface{}
+
+	// Assuming `body` contains your JSON response
 	if err := json.Unmarshal(body, &response); err != nil {
-		LogServerError("Failed to unmarshal response body", err, "ml_api")
+		fmt.Println("Failed to unmarshal response body:", err)
 		return nil
 	}
 
-	// Extract words from the response
-	wordsArr, ok := response["words"].([]interface{})
-	if !ok {
-		fmt.Print("Words not found in response")
-		return nil
-	}
-	words := make([]string, len(wordsArr))
-	for i, w := range wordsArr {
-		words[i] = w.(string)
+	var words []string
+	for _, item := range response {
+		// Type assertion to access the "word" field
+		word, ok := item["word"].(string)
+		if ok {
+			words = append(words, word)
+		}
 	}
 
 	return words
