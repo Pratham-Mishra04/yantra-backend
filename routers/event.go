@@ -11,8 +11,8 @@ func EventRouter(app *fiber.App) {
 	eventRoutes.Get("/", group_controllers.GetEvents)
 	eventRoutes.Post("/", middlewares.ModeratorOnly, group_controllers.AddEvent)
 
-	eventRoutes.Get("/token/:eventID", group_controllers.GetEvent)
-	eventRoutes.Get("/:eventID", group_controllers.JoinLiveEvent)
+	eventRoutes.Get("/token/:eventID", group_controllers.JoinLiveEvent)
+	eventRoutes.Get("/:eventID", group_controllers.GetEvent)
 
 	eventRoutes.Patch("/:eventID", middlewares.ModeratorOnly, group_controllers.UpdateEvent)
 	eventRoutes.Delete("/:eventID", middlewares.ModeratorOnly, group_controllers.DeleteEvent)

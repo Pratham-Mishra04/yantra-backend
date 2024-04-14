@@ -84,14 +84,12 @@ func AddEvent(c *fiber.Ctx) error {
 
 	startTime, err := time.Parse(time.RFC3339, reqBody.StartTime)
 	if err != nil {
-		startTime = time.Now()
-		// return &fiber.Error{Code: 400, Message: "Invalid Start Time."}
+		return &fiber.Error{Code: 400, Message: "Invalid Start Time."}
 	}
 
 	endTime, err := time.Parse(time.RFC3339, reqBody.EndTime)
 	if err != nil || endTime.Before(startTime) {
-		endTime = time.Now()
-		// return &fiber.Error{Code: 400, Message: "Invalid End Time."}
+		return &fiber.Error{Code: 400, Message: "Invalid End Time."}
 	}
 
 	event := models.Event{
