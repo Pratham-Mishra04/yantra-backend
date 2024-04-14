@@ -256,13 +256,6 @@ func LogIn(c *fiber.Ctx) error {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
-	//TODO remove this later
-	journal := models.Journal{
-		UserID: user.ID,
-	}
-
-	initializers.DB.Create(&journal)
-
 	return CreateSendToken(c, user, 200, "Logged In")
 }
 
