@@ -63,6 +63,9 @@ func CreatePage(c *fiber.Ctx) error {
 		return helpers.AppError{Code: fiber.StatusInternalServerError, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 
+	go helpers.EmotionExtractionFromPage(&page)
+	go helpers.NERExtractionFromPage(&page)
+
 	return c.Status(201).JSON(fiber.Map{
 		"status":  "success",
 		"message": "Page created!",
@@ -99,6 +102,9 @@ func UpdatePage(c *fiber.Ctx) error {
 	page.Title = reqBody.Title
 	page.Content = reqBody.Content
 	page.UpdatedAt = time.Now()
+
+	go helpers.EmotionExtractionFromPage(&page)
+	go helpers.NERExtractionFromPage(&page)
 
 	if err := initializers.DB.Save(&page).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}

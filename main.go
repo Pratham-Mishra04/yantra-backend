@@ -4,7 +4,9 @@ import (
 	"github.com/Pratham-Mishra04/yantra-backend/config"
 	"github.com/Pratham-Mishra04/yantra-backend/helpers"
 	"github.com/Pratham-Mishra04/yantra-backend/initializers"
+	"github.com/Pratham-Mishra04/yantra-backend/models"
 	"github.com/Pratham-Mishra04/yantra-backend/routers"
+	"github.com/Pratham-Mishra04/yantra-backend/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -18,6 +20,20 @@ func init() {
 	initializers.AutoMigrate()
 	helpers.InitializeBucketClients()
 	config.InitializeOAuthGoogle()
+
+	utils.Repeater(func() {
+		var groups []models.Group
+		initializers.DB.
+			Preload("Memberships").
+			Preload("Memberships.User").
+			Preload("Memberships.User.Journal").
+			Find(&groups)
+
+		for _, group := range groups {
+			helpers.GroupDominatingEmotion(&group)
+		}
+	}, 500)
+
 }
 
 func main() {

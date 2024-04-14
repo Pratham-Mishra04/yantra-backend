@@ -37,10 +37,14 @@ func JoinInitialGroup(c *fiber.Ctx) error {
 }
 
 func GetRecommendedGroups(c *fiber.Ctx) error {
-	var groups []models.Group
-	if err := initializers.DB.Find(&groups).Error; err != nil {
+	userID := c.GetRespHeader("loggedInUserID")
+
+	var user models.User
+	if err := initializers.DB.Preload("Journal").Where("id=?", userID).First(&user).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
+
+	groups := helpers.GetGroupRecommendations(&user)
 
 	return c.Status(200).JSON(fiber.Map{
 		"status":  "success",
@@ -163,6 +167,12 @@ func JoinGroup(c *fiber.Ctx) error {
 	//TODO increase no of members of the group.
 
 	if err := initializers.DB.Create(&membership).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	group.NumberOfMembers++
+
+	if err := initializers.DB.Save(&group).Error; err != nil {
 		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
 	}
 

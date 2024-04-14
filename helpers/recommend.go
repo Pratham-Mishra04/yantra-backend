@@ -3,6 +3,7 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -23,7 +24,7 @@ func EmotionExtractionFromOnboarding(content string) ([]string, []float64) {
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/emotion_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/emotion-extract", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return nil, nil
@@ -47,7 +48,7 @@ func EmotionExtractionFromOnboarding(content string) ([]string, []float64) {
 	// Extract emotions and scores from the response
 	emotionsArr, ok := response["emotions"].([]interface{})
 	if !ok {
-		LogServerError("Emotions not found in response", nil, "ml_api")
+		fmt.Print("Emotions not found in response")
 		return nil, nil
 	}
 	emotions := make([]string, len(emotionsArr))
@@ -57,7 +58,7 @@ func EmotionExtractionFromOnboarding(content string) ([]string, []float64) {
 
 	scoresArr, ok := response["scores"].([]interface{})
 	if !ok {
-		LogServerError("Scores not found in response", nil, "ml_api")
+		fmt.Print("Scores not found in response")
 		return nil, nil
 	}
 	scores := make([]float64, len(scoresArr))
@@ -79,7 +80,7 @@ func NERExtractionFromOnboarding(content string) []string {
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL2+"/ner-extract", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return nil
@@ -103,7 +104,7 @@ func NERExtractionFromOnboarding(content string) []string {
 	// Extract words from the response
 	wordsArr, ok := response["words"].([]interface{})
 	if !ok {
-		LogServerError("Words not found in response", nil, "ml_api")
+		fmt.Print("Words not found in response")
 		return nil
 	}
 	words := make([]string, len(wordsArr))
@@ -125,7 +126,7 @@ func EmotionExtractionFromPage(page *models.Page) {
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/emotion_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/emotion-extract", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return
@@ -149,7 +150,7 @@ func EmotionExtractionFromPage(page *models.Page) {
 	// Extract emotions and scores from the response
 	emotionsArr, ok := response["emotions"].([]interface{})
 	if !ok {
-		LogServerError("Emotions not found in response", nil, "ml_api")
+		fmt.Print("Emotions not found in response")
 		return
 	}
 	emotions := make([]string, len(emotionsArr))
@@ -159,7 +160,7 @@ func EmotionExtractionFromPage(page *models.Page) {
 
 	scoresArr, ok := response["scores"].([]interface{})
 	if !ok {
-		LogServerError("Scores not found in response", nil, "ml_api")
+		fmt.Print("Scores not found in response")
 		return
 	}
 	scores := make([]float64, len(scoresArr))
@@ -186,7 +187,7 @@ func NERExtractionFromPage(page *models.Page) {
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL2+"/ner-extract", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return
@@ -210,7 +211,7 @@ func NERExtractionFromPage(page *models.Page) {
 	// Extract words from the response
 	wordsArr, ok := response["words"].([]interface{})
 	if !ok {
-		LogServerError("Words not found in response", nil, "ml_api")
+		fmt.Print("Words not found in response")
 		return
 	}
 	words := make([]string, len(wordsArr))
@@ -277,7 +278,7 @@ func GroupDominatingEmotion(group *models.Group) {
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/get-dominating-emotion", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return
@@ -301,7 +302,7 @@ func GroupDominatingEmotion(group *models.Group) {
 	// Extract words from the response
 	emotion, ok := response["emotion"].(string)
 	if !ok {
-		LogServerError("emotion not found in response", nil, "ml_api")
+		fmt.Print("emotion not found in response")
 		return
 	}
 
@@ -326,6 +327,7 @@ func getPagesForLast7Days(user models.User) []models.Page {
 	if err := initializers.DB.Where("journal_id = ? AND created_at >= ?", user.Journal.ID, time.Now().AddDate(0, 0, -7)).Find(&pages).Error; err != nil {
 		LogDatabaseError(err.Error(), err, "db_error")
 	}
+
 	return pages
 }
 
@@ -389,7 +391,7 @@ func GetGroupRecommendations(user *models.User) []models.Group {
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/list-recommends", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return groups
@@ -410,10 +412,25 @@ func GetGroupRecommendations(user *models.User) []models.Group {
 		return groups
 	}
 
-	// Extract words from the response
-	groupIDs, ok := response["groupIDs"].([]string)
+	// Extract groupIDs from the response
+	groupIDsInterface, ok := response["groupIDs"].([]interface{})
 	if !ok {
-		LogServerError("emotion not found in response", nil, "ml_api")
+		fmt.Print("groupIDs not found in response or not an array")
+		return groups
+	}
+
+	// Convert groupIDsInterface to []string
+	var groupIDs []string
+	for _, id := range groupIDsInterface {
+		if str, ok := id.(string); ok {
+			groupIDs = append(groupIDs, str)
+		} else {
+			fmt.Print("groupID is not a string")
+			return groups
+		}
+	}
+
+	if len(groupIDs) == 0 {
 		return groups
 	}
 
@@ -427,7 +444,7 @@ func GetGroupRecommendations(user *models.User) []models.Group {
 
 	// Iterate over the groups and add only those that are not in groupIDs to the filtered slice
 	for _, group := range groups {
-		if !groupIDMap[group.ID.String()] {
+		if groupIDMap[group.ID.String()] {
 			filteredGroups = append(filteredGroups, group)
 		}
 	}
@@ -469,7 +486,7 @@ func GetGroupRecommendationsFromOnboarding(emotions []string, scores []float64, 
 	}
 
 	// Make a POST request to the ML_URL
-	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/list-recommends", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		LogServerError("Failed to make POST request", err, "ml_api")
 		return groups
@@ -490,10 +507,25 @@ func GetGroupRecommendationsFromOnboarding(emotions []string, scores []float64, 
 		return groups
 	}
 
-	// Extract words from the response
-	groupIDs, ok := response["groupIDs"].([]string)
+	// Extract groupIDs from the response
+	groupIDsInterface, ok := response["groupIDs"].([]interface{})
 	if !ok {
-		LogServerError("emotion not found in response", nil, "ml_api")
+		fmt.Print("groupIDs not found in response or not an array")
+		return groups
+	}
+
+	// Convert groupIDsInterface to []string
+	var groupIDs []string
+	for _, id := range groupIDsInterface {
+		if str, ok := id.(string); ok {
+			groupIDs = append(groupIDs, str)
+		} else {
+			fmt.Print("groupID is not a string")
+			return groups
+		}
+	}
+
+	if len(groupIDs) == 0 {
 		return groups
 	}
 
@@ -507,10 +539,85 @@ func GetGroupRecommendationsFromOnboarding(emotions []string, scores []float64, 
 
 	// Iterate over the groups and add only those that are not in groupIDs to the filtered slice
 	for _, group := range groups {
-		if !groupIDMap[group.ID.String()] {
+		if groupIDMap[group.ID.String()] {
 			filteredGroups = append(filteredGroups, group)
 		}
 	}
 
 	return filteredGroups
 }
+
+type HappinessPersonBody struct {
+	ID             string      `json:"id"`
+	Emotions       [][]string  `json:"emotions"`
+	Scores         [][]float64 `json:"scores"`
+	HappinessScore int         `json:"happiness_score"`
+}
+
+// func GetHappinessScore(user *models.User) {
+// 	pages := getPagesForLast7Days(*user)
+
+// 	var emotions [][]string
+// 	var scores [][]float64
+
+// 	happiness_score := 0
+
+// 	for i, page := range pages {
+// 		emotions = append(emotions, page.Emotions)
+// 		scores = append(scores, page.Scores)
+
+// 		if i == len(pages)-1 {
+// 			happiness_score = page.HappinessScore
+// 		}
+// 	}
+
+// 	person := HappinessPersonBody{
+// 		ID:             user.ID.String(),
+// 		Emotions:       emotions,
+// 		Scores:         scores,
+// 		HappinessScore: happiness_score,
+// 	}
+
+// 	requestBody, err := json.Marshal(person)
+// 	if err != nil {
+// 		LogServerError("Failed to marshal request body", err, "ml_api")
+// 		return
+// 	}
+
+// 	// Make a POST request to the ML_URL
+// 	resp, err := http.Post(initializers.CONFIG.ML_URL+"/get-health-index", "application/json", bytes.NewBuffer(requestBody))
+// 	if err != nil {
+// 		LogServerError("Failed to make POST request", err, "ml_api")
+// 		return
+// 	}
+// 	defer resp.Body.Close()
+
+// 	// Read the response body
+// 	body, err := io.ReadAll(resp.Body)
+// 	if err != nil {
+// 		LogServerError("Failed to read response body", err, "ml_api")
+// 		return
+// 	}
+
+// 	// Unmarshal the response body into a map
+// 	var response map[string]interface{}
+// 	if err := json.Unmarshal(body, &response); err != nil {
+// 		LogServerError("Failed to unmarshal response body", err, "ml_api")
+// 		return
+// 	}
+
+// 	// Extract words from the response
+// 	happinessScore, ok := response["happiness_score"].(string)
+// 	if !ok {
+// 		fmt.Print("Words not found in response")
+// 		return
+// 	}
+// 	// words := make([]string, len(wordsArr))
+// 	// for i, w := range wordsArr {
+// 	// 	words[i] = w.(string)
+// 	// }
+
+// 	// page.NER = words
+
+// 	return
+// }

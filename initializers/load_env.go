@@ -30,6 +30,7 @@ type Config struct {
 	FRONTEND_URL         string      `mapstructure:"FRONTEND_URL"`
 	BACKEND_URL          string      `mapstructure:"BACKEND_URL"`
 	ML_URL               string      `mapstructure:"ML_URL"`
+	ML_URL2              string      `mapstructure:"ML_URL2"`
 	GMAIL_KEY            string      `mapstructure:"GMAIL_KEY"`
 	GOOGLE_CLIENT_ID     string      `mapstructure:"GOOGLE_CLIENT_ID"`
 	GOOGLE_CLIENT_SECRET string      `mapstructure:"GOOGLE_CLIENT_SECRET"`

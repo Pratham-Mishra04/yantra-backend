@@ -83,7 +83,7 @@ func UpdateMe(c *fiber.Ctx) error {
 		go routines.DeleteFromBucket(helpers.UserCoverClient, oldCoverPic)
 	}
 
-	if c.Query("action", "") == "onboarding" && !user.IsOnboardingCompleted {
+	if c.Query("action", "") == "onboarding" {
 		go func() {
 			user.IsOnboardingCompleted = true
 			if err := initializers.DB.Save(&user).Error; err != nil {
