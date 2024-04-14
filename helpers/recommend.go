@@ -12,6 +12,108 @@ import (
 	"github.com/google/uuid"
 )
 
+func EmotionExtractionFromOnboarding(content string) ([]string, []float64) {
+	// Define the request body
+	requestBody, err := json.Marshal(map[string]string{
+		"content": content,
+	})
+	if err != nil {
+		LogServerError("Failed to marshal request body", err, "ml_api")
+		return nil, nil
+	}
+
+	// Make a POST request to the ML_URL
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/emotion_extraction", "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		LogServerError("Failed to make POST request", err, "ml_api")
+		return nil, nil
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		LogServerError("Failed to read response body", err, "ml_api")
+		return nil, nil
+	}
+
+	// Unmarshal the response body into a map
+	var response map[string]interface{}
+	if err := json.Unmarshal(body, &response); err != nil {
+		LogServerError("Failed to unmarshal response body", err, "ml_api")
+		return nil, nil
+	}
+
+	// Extract emotions and scores from the response
+	emotionsArr, ok := response["emotions"].([]interface{})
+	if !ok {
+		LogServerError("Emotions not found in response", nil, "ml_api")
+		return nil, nil
+	}
+	emotions := make([]string, len(emotionsArr))
+	for i, e := range emotionsArr {
+		emotions[i] = e.(string)
+	}
+
+	scoresArr, ok := response["scores"].([]interface{})
+	if !ok {
+		LogServerError("Scores not found in response", nil, "ml_api")
+		return nil, nil
+	}
+	scores := make([]float64, len(scoresArr))
+	for i, s := range scoresArr {
+		scores[i] = s.(float64)
+	}
+
+	return emotions, scores
+}
+
+func NERExtractionFromOnboarding(content string) []string {
+	// Define the request body
+	requestBody, err := json.Marshal(map[string]string{
+		"content": content,
+	})
+	if err != nil {
+		LogServerError("Failed to marshal request body", err, "ml_api")
+		return nil
+	}
+
+	// Make a POST request to the ML_URL
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		LogServerError("Failed to make POST request", err, "ml_api")
+		return nil
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		LogServerError("Failed to read response body", err, "ml_api")
+		return nil
+	}
+
+	// Unmarshal the response body into a map
+	var response map[string]interface{}
+	if err := json.Unmarshal(body, &response); err != nil {
+		LogServerError("Failed to unmarshal response body", err, "ml_api")
+		return nil
+	}
+
+	// Extract words from the response
+	wordsArr, ok := response["words"].([]interface{})
+	if !ok {
+		LogServerError("Words not found in response", nil, "ml_api")
+		return nil
+	}
+	words := make([]string, len(wordsArr))
+	for i, w := range wordsArr {
+		words[i] = w.(string)
+	}
+
+	return words
+}
+
 func EmotionExtractionFromPage(page *models.Page) {
 	// Define the request body
 	requestBody, err := json.Marshal(map[string]string{
@@ -124,8 +226,8 @@ func NERExtractionFromPage(page *models.Page) {
 }
 
 type UserDominatingEmotions struct {
-	UserID                 uuid.UUID
-	UserDominatingEmotions []string
+	UserID                 uuid.UUID `json:"userID"`
+	UserDominatingEmotions []string  `json:"emotions"`
 }
 
 func GroupDominatingEmotion(group *models.Group) {
@@ -265,6 +367,86 @@ func GetGroupRecommendations(user *models.User) []models.Group {
 		Emotions:  emotions,
 		Scores:    scores,
 		Locations: locations,
+	}
+
+	var groups []models.Group
+	initializers.DB.Find(&groups)
+
+	var groupBodies []GroupBody
+
+	for _, group := range groups {
+		groupBodies = append(groupBodies, GroupBody{
+			ID:       group.ID.String(),
+			Emotion:  group.Emotion,
+			Location: group.Location,
+		})
+	}
+
+	requestBody, err := json.Marshal(RecommendationReqBody{Person: person, Groups: groupBodies})
+	if err != nil {
+		LogServerError("Failed to marshal request body", err, "ml_api")
+		return groups
+	}
+
+	// Make a POST request to the ML_URL
+	resp, err := http.Post(initializers.CONFIG.ML_URL+"/ner_extraction", "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		LogServerError("Failed to make POST request", err, "ml_api")
+		return groups
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		LogServerError("Failed to read response body", err, "ml_api")
+		return groups
+	}
+
+	// Unmarshal the response body into a map
+	var response map[string]interface{}
+	if err := json.Unmarshal(body, &response); err != nil {
+		LogServerError("Failed to unmarshal response body", err, "ml_api")
+		return groups
+	}
+
+	// Extract words from the response
+	groupIDs, ok := response["groupIDs"].([]string)
+	if !ok {
+		LogServerError("emotion not found in response", nil, "ml_api")
+		return groups
+	}
+
+	groupIDMap := make(map[string]bool)
+	for _, id := range groupIDs {
+		groupIDMap[id] = true
+	}
+
+	// Create a new slice to store the filtered groups
+	var filteredGroups []models.Group
+
+	// Iterate over the groups and add only those that are not in groupIDs to the filtered slice
+	for _, group := range groups {
+		if !groupIDMap[group.ID.String()] {
+			filteredGroups = append(filteredGroups, group)
+		}
+	}
+
+	return filteredGroups
+}
+
+func GetGroupRecommendationsFromOnboarding(emotions []string, scores []float64, NERs []string, user *models.User) []models.Group {
+	var emotions2d [][]string
+	var scores2d [][]float64
+
+	emotions2d = append(emotions2d, emotions)
+	scores2d = append(scores2d, scores)
+
+	person := PersonBody{
+		ID:        user.ID.String(),
+		Emotions:  emotions2d,
+		Scores:    scores2d,
+		Locations: NERs,
 	}
 
 	var groups []models.Group

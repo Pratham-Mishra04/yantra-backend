@@ -14,13 +14,13 @@ type Group struct {
 	Moderator       Moderator         `gorm:"" json:"moderator"`
 	NumberOfMembers int16             `gorm:"default:1" json:"noMembers"`
 	Location        string            `gorm:"type:text" json:"location"`
-	Emotion         string            `json:"-"`
+	Emotion         string            `gorm:"type:text;default:neutral" json:"-"`
 	ResourceBucket  []ResourceBucket  `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Polls           []Poll            `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Announcements   []Announcement    `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Posts           []Post            `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
 	Events          []Event           `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
-	Memberships     []GroupMembership `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"-"`
+	Memberships     []GroupMembership `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"memberships"`
 	CreatedAt       time.Time         `gorm:"default:current_timestamp" json:"createdAt"`
 }
 

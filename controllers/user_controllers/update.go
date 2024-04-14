@@ -58,6 +58,9 @@ func UpdateMe(c *fiber.Ctx) error {
 	if reqBody.Bio != nil {
 		user.Bio = *reqBody.Bio
 	}
+	if reqBody.Location != nil {
+		user.Location = *reqBody.Location
+	}
 	if reqBody.ProfilePic != nil && *reqBody.ProfilePic != "" {
 		user.ProfilePic = *reqBody.ProfilePic
 	}
@@ -87,6 +90,19 @@ func UpdateMe(c *fiber.Ctx) error {
 				helpers.LogDatabaseError("Error while updating User-UpdateMe", err, "go_routine")
 			}
 		}()
+
+		emotions, scores := helpers.EmotionExtractionFromOnboarding(user.Bio)
+		NERs := helpers.NERExtractionFromOnboarding(user.Bio)
+		NERs = append(NERs, user.Location)
+
+		recommendedGroups := helpers.GetGroupRecommendationsFromOnboarding(emotions, scores, NERs, &user)
+
+		return c.Status(200).JSON(fiber.Map{
+			"status":  "success",
+			"message": "User updated successfully",
+			"user":    user,
+			"groups":  recommendedGroups,
+		})
 	}
 
 	return c.Status(200).JSON(fiber.Map{

@@ -19,5 +19,6 @@ type UserUpdateSchema struct {
 	ProfilePic *string         `json:"profilePic" validate:"image"`
 	CoverPic   *string         `json:"coverPic" validate:"image"`
 	Bio        *string         `json:"bio" validate:"max=500"`
+	Location   *string         `json:"location" validate:"max=50"`
 	Tags       *pq.StringArray `json:"tags"`
 }
