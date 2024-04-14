@@ -46,10 +46,23 @@ func GetRecommendedGroups(c *fiber.Ctx) error {
 
 	groups := helpers.GetGroupRecommendations(&user)
 
+	var exitingGroupMembership models.GroupMembership
+	if err := initializers.DB.Where("user_id=?", userID).First(&exitingGroupMembership).Error; err != nil {
+		return helpers.AppError{Code: 500, Message: config.DATABASE_ERROR, LogMessage: err.Error(), Err: err}
+	}
+
+	var filteredGroups []models.Group
+
+	for _, group := range groups {
+		if group.ID != exitingGroupMembership.GroupID {
+			filteredGroups = append(filteredGroups, group)
+		}
+	}
+
 	return c.Status(200).JSON(fiber.Map{
 		"status":  "success",
 		"message": "",
-		"groups":  groups,
+		"groups":  filteredGroups,
 	})
 }
 
