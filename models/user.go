@@ -19,6 +19,7 @@ type User struct {
 	PhoneNo                   string           `json:"-"`
 	Bio                       string           `json:"bio"`
 	Tags                      pq.StringArray   `gorm:"type:text[]" json:"tags"`
+	Location                  string           `gorm:"type:text" json:"location"`
 	PasswordResetToken        string           `json:"-"`
 	PasswordResetTokenExpires time.Time        `json:"-"`
 	PasswordChangedAt         time.Time        `gorm:"default:current_timestamp" json:"-"`
